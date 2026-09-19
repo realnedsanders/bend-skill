@@ -14,20 +14,17 @@ From this repository root, choose one install scope and either copy or symlink:
 
 ```bash
 # User install (copy)
-mkdir -p ~/.prime/agent/skills
-cp -R "$PWD/skills/bend" ~/.prime/agent/skills/bend
+mkdir -p ~/.agents/skills
+cp -R "$PWD/skills/bend" ~/.agents/skills/bend
 
 # User install (symlink for development)
-mkdir -p ~/.prime/agent/skills
-ln -s "$PWD/skills/bend" ~/.prime/agent/skills/bend
+mkdir -p ~/.agents/skills
+ln -s "$PWD/skills/bend" ~/.agents/skills/bend
 
 # Project install
-mkdir -p /path/to/project/.prime/agent/skills
-cp -R "$PWD/skills/bend" /path/to/project/.prime/agent/skills/bend
+mkdir -p /path/to/project/.agents/skills
+cp -R "$PWD/skills/bend" /path/to/project/.agents/skills/bend
 ```
-
-Do not run two alternatives without removing the first destination. In Prime
-Agent, run `/reload`, then invoke `/skill:bend` once to verify discovery.
 
 Requires Bend 2 (`bend --version`). Detailed language claims were checked
 against the installed Bend 2.0.10 CLI. Source research also used
