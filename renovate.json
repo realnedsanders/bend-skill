@@ -1,0 +1,39 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    "helpers:pinGitHubActionDigests"
+  ],
+  "dependencyDashboard": true,
+  "dependencyDashboardTitle": "Dependency Dashboard",
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Track the Bend release used for current skill claims",
+      "managerFilePatterns": [
+        "/^(README\\.md|skills\\/bend\\/SKILL\\.md)$/"
+      ],
+      "matchStrings": [
+        "Bend (?<currentValue>\\d+\\.\\d+\\.\\d+)",
+        "`bend` (?<currentValue>\\d+\\.\\d+\\.\\d+)"
+      ],
+      "depNameTemplate": "bendlang/bend",
+      "datasourceTemplate": "github-releases",
+      "extractVersionTemplate": "^v(?<version>.*)$",
+      "versioningTemplate": "semver"
+    }
+  ],
+  "packageRules": [
+    {
+      "description": "Require dashboard approval before changing the reviewed Bend version",
+      "matchDatasources": [
+        "github-releases"
+      ],
+      "matchPackageNames": [
+        "bendlang/bend"
+      ],
+      "dependencyDashboardApproval": true,
+      "groupName": "Bend"
+    }
+  ]
+}

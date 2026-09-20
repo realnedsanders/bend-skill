@@ -67,6 +67,21 @@ Then check the Markdown links and run selected Bend examples against the target
 `bend --version`; the language is young enough that schema validation alone is
 not sufficient.
 
+CI runs the skill validator and checks Markdown links on every pull request and
+push to `main`.
+
+## Dependency updates
+
+[Renovate](https://github.com/apps/renovate) watches Bend releases and the
+GitHub Actions used by CI. Its Dependency Dashboard issue lists new Bend
+releases. Bend updates require approval in that issue before Renovate opens a
+pull request, because the skill must be checked against each new compiler
+release rather than having its compatibility claim changed silently.
+
+To enable it, install the free Renovate GitHub App for this public repository
+and complete its onboarding pull request if prompted. Configuration lives in
+[`renovate.json`](renovate.json).
+
 ## Sources
 
 - Installed `bend` 2.0.10 (`bend guide`, `bend base`)
