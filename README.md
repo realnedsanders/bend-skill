@@ -10,6 +10,14 @@ balance fork-join work. It does **not** copy
 
 ## Install
 
+### From [skills.sh](https://skills.sh)
+
+```bash
+npx skills add https://github.com/realnedsanders/bend-skill --skill bend
+```
+
+### From a local clone
+
 From this repository root, choose one install scope and either copy or symlink:
 
 ```bash
