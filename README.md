@@ -39,7 +39,6 @@ against the installed Bend 2.0.22 CLI. Source research also used
 `bendlang/bend` tag `v2.0.22` at commit
 `8745e421c33e7e6b5e8815a85d974222c2541fc4`;
 when they differ, the installed CLI governs the project being compiled.
-Bend 1 / HVM programs do not apply.
 
 ## Layout
 
@@ -78,10 +77,6 @@ GitHub Actions used by CI. Its Dependency Dashboard issue lists new Bend
 releases, and Renovate opens a grouped pull request immediately. Bend pull
 requests never automerge: check the skill against the new compiler before
 merging a changed compatibility claim.
-
-To enable it, install the free Renovate GitHub App for this public repository
-and complete its onboarding pull request if prompted. Configuration lives in
-[`renovate.json`](renovate.json).
 
 ## Sources
 
