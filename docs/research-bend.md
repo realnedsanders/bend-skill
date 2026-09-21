@@ -2,8 +2,9 @@
 
 Sources, in order of authority:
 
-1. Installed CLI: `bend` 2.0.10 (`bend guide`, `bend --help`, `bend base`)
-2. Official repo: `/home/user/code/github.com/bendlang/bend`
+1. Installed CLI: `bend` 2.0.22 (`bend version`, `bend guide`, `bend base`)
+2. Official repo tag `v2.0.22` at
+   `8745e421c33e7e6b5e8815a85d974222c2541fc4`
 3. `AGENTS.md`, `README.md`, `WONTFIX.txt`
 4. `guide/GUIDE.md`, `guide/SHADERS.md`, `guide/EFFECTS.md`
 5. `bend2/base.bend` (via `bend base` / `bend base --types`)
@@ -74,17 +75,23 @@ WONTFIX.
 - No tactics, no proof search, no `sorry`. A proposition is a type; a
   proof is a `def`. Holes are `?TODO` (open) or `?name` (print the goal).
 - No type classes, traits, or macros beyond compile-time `~` templates.
+  Templates are checked once against opaque parameters and then specialized;
+  laws may take `~` parameters.
 - No inference worth relying on. Annotate. When the checker cannot decide,
   write `{e : T}` or `(a + b : U32)`.
-- No mutual recursion. Encode two functions as one `def` plus a tag.
+- Safe code has no mutual recursion. Encode two functions as one `def` plus a
+  tag. Law-mediated cycles between `@unsafe` defs stay outside guarantees.
 - No `match` on a computed value. `match sum(xs, 0):` is rejected.
   Scrutinees are parameters or pattern-bound variables. Computed dispatch
   goes through a helper (`foo.fin`) that matches its parameter. Demos and
   evals do this constantly.
-- Operators need spaces on both sides. `(a + b : T)` calls `T.add`.
-  Without `: T` they belong to `Nat`.
+- Operators need spaces on both sides and an annotation around their own
+  expression. `(a + b : T)` calls `T.add`; even `Nat` needs
+  `(a + b : Nat)`. A return type or surrounding call does not infer it.
 - `==` is the equality **type** `{a == b : T}`. Value equality is
   `T.is_eq(a, b)`.
+- `x : T = v` annotates and binds one name. A typed destructuring pattern is
+  invalid; bind the typed value, then destructure it.
 
 ### Affine by default
 
@@ -94,14 +101,16 @@ WONTFIX.
 - Closures are affine even when they capture `Data`. Only **top-level
   defs** may be called freely. Partial apps like `U32.add(2)` are
   closures.
-- `Array<T>` is `Type` (exactly one owner). `a[i]` returns the array
-  beside the element. Writes are `a[i] <- v`. Sugar `a[i]` assumes
-  `Array<U32>`; other element types use `Array.get` / `Array.swap` /
-  `Array.set`.
+- `Array<T>` is `Type` (one checked owner). `a[i]` returns the array beside
+  the element. Writes are `a[i] <- v`. Sugar `a[i]` assumes `Array<U32>`;
+  other element types use `Array.get` / `Array.swap` / `Array.set`.
+  Bend 2.0.22 adds experimental `@unsafe` aliases with `Array.fork`/`join`
+  and `Array.atomic.*`; ordinary code remains single-owner.
 - Handles (`File`, `Socket`, `Window`, `Audio`) are affine and opaque.
   Every effect on a handle hands it back beside the result.
-- Dropping an affine value is free. Sharing a `+` value is a refcount.
-  SHADERS.md: unnecessary `+` on device data can 2x a frame.
+- Dropping an affine value is permitted, but destroying a large owned value is
+  not necessarily free. Sharing boxed `+` values can add refcounts. SHADERS.md:
+  unnecessary `+` on device data can 2x a frame.
 
 ### Termination
 
@@ -110,17 +119,21 @@ WONTFIX.
   parameter; later args are free. Put the shrinking argument first.
 - `tests/halt/non_structural_descent.bend`: `fold(ndiv(n, 2n))` is
   refused even if it would halt. `ndiv` is not a constructor subterm.
-- World-bounded loops (servers) count down a `Nat` fuel argument, or
-  mark `@unsafe`. `@unsafe` skips the termination check and **falls
-  outside proof guarantees**. Checker still exits 0 (WONTFIX #776).
+- World-bounded loops (servers) count down a `Nat` fuel argument, or mark
+  `@unsafe`. `@unsafe` skips the termination check and **falls outside proof
+  guarantees**. The checker still exits 0, but Bend 2.0.22 names every local
+  def that transitively relies on unsafe or foreign code (WONTFIX #776).
 - `tests/run/fuel_loops.bend` is the fuel idiom (gcd, Collatz).
 
 ### Parallelism
 
-- `a b = f(x) g(y)` is a parallel let: independent, should take similar
-  time. Scheduler is binary fork-join; tasks are never stolen.
+- `a b = f(x) g(y)` is a parallel let: safe code makes the branches
+  independent, and they should take similar time. Unsafe shared arrays require
+  an explicit race argument. Scheduler is binary fork-join; tasks are never
+  stolen.
 - `f!(x)` ships that call and nested parallel calls to the GPU (or CPU
-  pool if no GPU). JS target is sequential.
+  pool if unavailable/disabled). Native GPU use is on by default; `--gpu off`
+  selects the CPU pool. JS target is sequential.
 - GPU likes uniform numeric work. Divergent search stays on CPU.
 - SHADERS.md (AI-for-AI, from `demos/app_slash_boss_3d`): one bang, fork
   tree that fills the lane cube, then **flat loops** over cons lists.
@@ -140,7 +153,8 @@ WONTFIX.
 - `for y: B where P(y)`: `y` is the pair `(y, P(y) proof)`.
 - Empty match on `e : Empty` closes a branch. `{a != b : T}` is
   `{a == b : T} -> Empty`.
-- F32 is axiomatic: nothing about floats can be proven.
+- Primitive F32 algebra is axiomatic; reflexivity and congruence for
+  defined wrappers remain provable.
 - No positivity check; `Type : Type` holds. Consistency is the live/dead
   split: live recursion terminates; dead code may loop or inhabit Empty
   but is not live evidence.
@@ -148,13 +162,18 @@ WONTFIX.
 ### IO
 
 - Effects live in `IO`. `do IO<R>:` with `x : T <- m` and `return e`.
-- Every bind is annotated. `x : T = v` is a pure let inside `do`.
+- Every bind is annotated. `x : T = v` is a pure let whose right side is
+  annotated; typed destructuring patterns are invalid.
 - Fallible effects return `Result`. `IO.try` unwraps or exits.
 - `IO.fork` / `IO.join` / `IO.spawn` / channels: one event loop, Node-like.
 - Custom effects: body is `import "./x.c"` plus `import "./x.js"`. Host
-  name is the def, lowercased, dots to underscores. No ABI promise
-  across Bend versions (`guide/EFFECTS.md`).
+  name is the def, lowercased, dots to underscores. No ABI promise across Bend
+  versions. In 2.0.22 `guide/EFFECTS.md` still shows an obsolete `io_node`
+  argument, so matching `bend2/effs/` and compiler source outrank that ABI
+  example.
 - User handle types are WONTFIX: reuse Base handle laws.
+- 2.0.22 adds `IO.random_u32`, `File.read_at`, `File.size`,
+  `File.write_bytes`, and timeout-based `TCP.poll`.
 
 ### Modules and names
 
@@ -175,8 +194,9 @@ print the lines after `#|`. Failures use `#|Error:` and `#|exit 1`.
 
 For user projects: `bend file.bend` checks; a pure `main` is normalized
 and printed (slow for big work); an `IO` `main` runs compiled. A file
-with no `main` just checks. `bend file.bend --checkup` checks each
-import alone.
+with no `main` just checks. `bend file.bend --check-only` checks the target
+and imports without running; `--checkup` checks and runs each direct aliased
+import as its own root rather than checking the entry root.
 
 ### Tooling limits (skill must not pretend otherwise)
 

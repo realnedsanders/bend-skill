@@ -60,7 +60,7 @@ Name these helpers `foo.fin` or `foo.step` (dots are characters).
   arguments unchanged, then one constructor field of a parameter.
 - Not a descent: `n/2`, `n-1` on `U32`, `Nat.divmod`, an index into
   an array, a hash.
-- No mutual recursion. One def plus a tag:
+- Safe code has no mutual recursion. Use one def plus a tag:
 
 ```python
 type Which is Data:
@@ -77,7 +77,9 @@ def both(w: Which, n: Nat) -> U32:
       both(GoA{}, m)
 ```
 
-- `@unsafe def` skips the check. Comment why. Checker still exits 0.
+- `@unsafe def` skips the check. Comment why. Bend 2.0.22 even permits
+  law-mediated cycles between unsafe defs; that is not a substitute for safe
+  structural recursion. The checker still exits 0 and names relying defs.
 
 Fuel (from `tests/run/fuel_loops.bend`): first argument `fuel: Nat`,
 match `0n` / `1n+f`, recurse on `f`.
@@ -100,12 +102,15 @@ match `0n` / `1n+f`, recurse on `f`.
 | `have`, `show`, `by` | extra `def` lemmas |
 | `namespace` / `open` | `import ./f.bend as M`, then `M.x` |
 | unicode `→`, `∀`, `ℕ` | `->`, `for`, `Nat` |
-| `mut` / `&` borrows | affine binders; `Array` one owner |
+| `mut` / `&` borrows | affine binders; one safe `Array` owner |
 
 ## Operators and literals
 
 - Spaces around operators. `(a + b : T)` → `T.add`.
-- Without `: T`, `+ - * / %` are `Nat`.
+- Every operator needs `( ... : T)` around its own expression, including
+  `Nat`. A def return type or a surrounding call, lambda, constructor, list,
+  match arm, or `~` argument does not reach inward. Write `(a + b : Nat)`, not
+  bare `a + b`.
 - Bits: `.&.` `.|.` `.^.` `<<` `>>` (shift amount is `Nat`).
 - `++` is `String` concat anywhere.
 - `3` is `U32`. `3n` is `Nat`. `'c'` is `Char`. `"s"` is `String`.
@@ -145,7 +150,16 @@ def twice(~f: U32 -> U32, x: U32) -> U32:
 ```
 
 Template arguments first. `~` args must be closed (no caller locals).
-A template may call only templates declared **above** it.
+A template may call only templates declared **above** it. Since Bend 2.0.17,
+the template body is checked once against opaque parameters; each instance is
+that checked definition, not a re-read of its source. Laws may take `~`
+parameters, and a template instance does not by itself make a verdict unsafe.
+
+## Typed lets
+
+`x : T = v` binds the name `x` to the annotated term `{v : T}`. The left side
+must be one name: `(x, y) : A & B = pair` is invalid. Destructure the already
+typed value in the following body instead.
 
 ## Equality and proofs (syntax only)
 
@@ -180,7 +194,8 @@ Bend repo's harness — do not put `#|` in app code unless you mean that.
 
 ## When the checker and the runtime disagree
 
-WONTFIX: a pure `main` is normalized lazily; compiled lanes are
-strict. Unused lambda arguments may be skipped by the checker. Do not
-rely on side-effect-like work in an unused position (there are no
-live side effects there anyway).
+WONTFIX: a pure `main` is normalized lazily; compiled lanes are strict. The
+checker skips dead source such as unused applied-lambda arguments and match arms
+shadowed by earlier arms. This is safe for the evaluated term, but it is not
+lint/type coverage of unreachable text. Do not use dead branches to claim test
+coverage or hide unfinished code.

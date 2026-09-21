@@ -58,7 +58,7 @@ validate final code → measure when performance is in scope
 ```
 
 1. User requirements and existing repository conventions come first.
-2. Check `bend --version` when unknown. Use targeted Base lookups; consult
+2. Check `bend version` when unknown. Use targeted Base lookups; consult
    `bend guide` on syntax/version uncertainty.
 3. Preserve existing laws. For new critical pure behavior, propose laws and use
    the three-file layout when accepted.
@@ -75,8 +75,8 @@ validate final code → measure when performance is in scope
 2. Affine default. `+` permits reuse but does not itself dictate runtime cost.
 3. Structural termination: earlier recursive arguments pass unchanged until a
    constructor subterm decreases. Fuel or justified `@unsafe` at world loops.
-4. Bend does almost no inference. Never invent `if`, tactics, typeclasses, or
-   match-on-call syntax.
+4. Bend does almost no inference. Annotate each operator's own expression.
+   Never invent `if`, tactics, typeclasses, or match-on-call syntax.
 5. Query Base first; use `Type.verb` for Base-like/type-grouped APIs rather than
    as a universal naming mandate.
 6. Proofs are programs. Use small lemmas and evidence-carrying decisions.
@@ -88,7 +88,8 @@ validate final code → measure when performance is in scope
 
 ## Success criteria for an agent using the skill
 
-- Existing proof gates pass; any unsafe-count verdict is explicitly audited.
+- Existing proof gates pass; every def named as relying on unsafe or foreign
+  code is explicitly audited.
 - The edited library checks, or the requested runnable/backend is built and run.
 - No invented syntax.
 - Recursive calls satisfy the actual left-to-right structural rule.

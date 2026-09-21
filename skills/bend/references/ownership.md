@@ -62,8 +62,8 @@ they must not (unique resources).
 
 - Top-level `def`: callable any times.
 - `x => e` / partial app: **one** call, even if captures are `Data`.
-- `~f` template: inlined, multi-shot, argument must be closed, only
-  call templates above you.
+- `~f` template: checked once, instantiated/inlined at closed arguments,
+  multi-shot, and may call only templates declared above it.
 
 `List.map` is a template for this reason. Do not write:
 
@@ -77,7 +77,8 @@ def bad_map(-A: Type, -B: Type, f: A -> B, xs: List<A>) -> List<B>:
 
 ## Arrays
 
-`Array<T>` is `Type`: one owner.
+`Array<T>` is `Type`: one checked owner. Bend 2.0.22 adds an explicit
+`@unsafe` escape hatch for shared arrays; ordinary code remains single-owner.
 
 ```python
 a = [0 : U32*8n]   # length power of two
@@ -90,8 +91,14 @@ a[5]               # read: yields array & element
   elements, otherwise `Array.swap`, plus `Array.set`. `Array.clone`
   can duplicate an array only when its element type is `Data`.
 - Indexes wrap.
-- Do not hand an `Array` down a GPU fork tree (one owner). Build
-  cons lists for tiles (`bend guide shaders`).
+- For safe code, do not hand an `Array` down a fork tree. Build cons lists for
+  tiles (`bend guide shaders`) or move disjoint arrays into branches.
+- `Array.fork(T, a)` creates two handles to one block in O(1), and
+  `Array.join(T, a, b)` merges them. Both are `@unsafe`: document the aliasing
+  protocol, join every fork, and prevent unsynchronized writes to one cell.
+- Shared `U32` cells provide `Array.atomic.add/min/max/and/or/xor/exch/cas`;
+  shared `F32` provides `Array.atomic.fadd`. Each returns the handle with the
+  old value. A match on a shared handle copies its part as `Array.clone` does.
 - Unbalanced `ALeaf`/`ANode` trees trap at runtime (WONTFIX).
   Construct arrays with the literals / Base ops.
 
@@ -130,8 +137,10 @@ but you pay counts.
    reusable contract requires it, and only on `Data`.
 2. Put reusable element types in `List<&2, A>` / `+List<A>` when the
    algorithm copies heads (`insert`, `sort`).
-3. Do not mark functions, arrays, or opaque `Type` handles `+`. `Chan(A)` is
-   a separate copyable `Data` abstraction.
+3. Do not mark functions, arrays, or opaque `Type` handles `+` in safe code.
+   Shared-array `+` belongs only inside a documented `@unsafe`
+   `Array.fork`/`Array.join` protocol. `Chan(A)` is a separate copyable `Data`
+   abstraction.
 4. Prefer tail recursion that **moves** the structure (reverse onto
    an accumulator) over copying.
 5. Drop unused forks' values; do not "return the scene" from a

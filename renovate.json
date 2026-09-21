@@ -25,15 +25,16 @@
   ],
   "packageRules": [
     {
-      "description": "Require dashboard approval before changing the reviewed Bend version",
+      "description": "Group the reviewed Bend version references in one immediate PR",
       "matchDatasources": [
         "github-releases"
       ],
       "matchPackageNames": [
         "bendlang/bend"
       ],
-      "dependencyDashboardApproval": true,
-      "groupName": "Bend"
+      "groupName": "Bend",
+      "prCreation": "immediate",
+      "automerge": false
     }
   ]
 }

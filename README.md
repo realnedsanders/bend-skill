@@ -34,9 +34,10 @@ mkdir -p /path/to/project/.agents/skills
 cp -R "$PWD/skills/bend" /path/to/project/.agents/skills/bend
 ```
 
-Requires Bend 2 (`bend --version`). Detailed language claims were checked
+Requires Bend 2 (`bend version`). Detailed language claims were checked
 against the installed Bend 2.0.22 CLI. Source research also used
-`bendlang/bend` commit `15ae0c86f3193b8f645b4bedbc438655b648d0da`;
+`bendlang/bend` tag `v2.0.22` at commit
+`8745e421c33e7e6b5e8815a85d974222c2541fc4`;
 when they differ, the installed CLI governs the project being compiled.
 Bend 1 / HVM programs do not apply.
 
@@ -64,7 +65,7 @@ uvx --from skills-ref agentskills validate ./skills/bend
 ```
 
 Then check the Markdown links and run selected Bend examples against the target
-`bend --version`; the language is young enough that schema validation alone is
+`bend version`; the language is young enough that schema validation alone is
 not sufficient.
 
 CI runs the skill validator and checks Markdown links on every pull request and
@@ -74,9 +75,9 @@ push to `main`.
 
 [Renovate](https://github.com/apps/renovate) watches Bend releases and the
 GitHub Actions used by CI. Its Dependency Dashboard issue lists new Bend
-releases. Bend updates require approval in that issue before Renovate opens a
-pull request, because the skill must be checked against each new compiler
-release rather than having its compatibility claim changed silently.
+releases, and Renovate opens a grouped pull request immediately. Bend pull
+requests never automerge: check the skill against the new compiler before
+merging a changed compatibility claim.
 
 To enable it, install the free Renovate GitHub App for this public repository
 and complete its onboarding pull request if prompted. Configuration lives in
