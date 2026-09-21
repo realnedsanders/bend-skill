@@ -26,7 +26,8 @@ def main() -> IO(Unit):
 Rules:
 
 - Annotate every bind: `x : T <- m`.
-- `x : T = v` is a pure let in the block.
+- `x : T = v` is a pure let and annotates `v`; only a name may be typed.
+  Destructure a typed value in the following body instead of typing a pattern.
 - A statement `m` is a `Unit` step.
 - `return e` is `M.pure`.
 - Leading type args of the monad (`Maybe<&2, U32>`) are passed to
@@ -34,6 +35,8 @@ Rules:
 
 `IO.try` unwraps `Result` or exits. `IO.die` exits with your error.
 `IO.args` is argv without the runtime's flags (`--` ends them).
+Bend 2.0.22 also provides `IO.random_u32`, `File.read_at`, `File.size`,
+`File.write_bytes`, and `TCP.poll`; query their exact Base signatures.
 
 ## Handles
 
@@ -67,8 +70,9 @@ if they all wait.
 Servers that loop forever: `@unsafe` + comment, or fuel. Prove the
 per-connection **pure** function (`http_response`), not the accept loop. See
 release-matched
-[`demos/io_http_server`](https://github.com/bendlang/bend/tree/v2.0.10/demos/io_http_server)
-or the corresponding demo in a matching source checkout.
+[`demos/io_http_server`](https://github.com/bendlang/bend/tree/v2.0.22/demos/io_http_server)
+or the corresponding demo in a matching source checkout. `TCP.poll` adds a
+receive deadline for dropping idle connections.
 
 ## Graphics apps
 
@@ -97,10 +101,10 @@ def Clock.now() -> IO(U32):
   `io_eff(CID_..., run, need)` from a constructor. A blocking JS effect also
   supplies `<name>_need` and parks/resumes through the runtime API. Copy the
   matching upstream effect; these runtime names are version-coupled.
-- Need 0 (run now), `IO_READ`, `IO_TIME`, etc. Try `bend guide effects`
-  on newer Bend releases. Bend 2.0.10 does not expose that named guide; with
-  that version, use a matching source checkout's `guide/EFFECTS.md` and
-  `bend2/effs/` instead.
+- Need 0 (run now), `IO_READ`, `IO_TIME`, etc. Read `bend guide effects`,
+  but treat a matching checkout's `bend2/effs/` and compiler as the ABI source
+  of truth. The Bend 2.0.22 guide still shows an obsolete extra `hot` argument
+  to `io_node`; current sealing derives from constructor identity.
 - **No ABI promise.** Rebuild and retest effects on every Bend upgrade.
 - Output binary name must not collide with the effect files.
 

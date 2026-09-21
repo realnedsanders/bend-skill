@@ -125,7 +125,7 @@ If the program called `le_case(x, h)` and branched, the proof cannot
 `match le_case(x, h)`. Pass the verdict into `.fin` and match that.
 
 See the release-matched
-[`demos/proof_insertion_sort`](https://github.com/bendlang/bend/tree/v2.0.10/demos/proof_insertion_sort)
+[`demos/proof_insertion_sort`](https://github.com/bendlang/bend/tree/v2.0.22/demos/proof_insertion_sort)
 example, or the corresponding directory in a source checkout matching the
 installed compiler.
 
@@ -157,6 +157,13 @@ def le_case(x: Nat, h: Nat) -> Or(LE(x, h), LE(h, x)):
 Then insert/sort and the proof share one case tree. This is the Bend
 form of "make illegal states unrepresentable" plus "don't resplit
 decidable equality in the proof".
+
+### Template theorems
+
+A law may take closed `~` parameters. Its proof is checked once against those
+opaque parameters, then instantiated like any other template; hypotheses may
+be reused without spending an affine closure. Prefer this over duplicating a
+proof for each closed operation. See upstream `tests/proof/template_law.bend`.
 
 ### Empty and inequality
 
@@ -227,11 +234,19 @@ bend PROOF.bend
 # All terms check.
 ```
 
-`All terms check.` is the clean safe-code verdict. If you see `All terms
-check, with N unsafe annotations.`, the exit code is still 0 (WONTFIX), but the
-program is not fully covered by Bend's termination guarantees. Locate and audit
-every unsafe occurrence; treat an unexplained or changed count as a failed
-review.
+`All terms check.` is the clean safe-code verdict. Bend 2.0.22 instead names
+transitive dependencies on trusted code:
 
-`bend file.bend --checkup` checks each import alone — use it when a
-cycle or a missing fill is unclear.
+```text
+All terms check, but N defs rely on unsafe or foreign code:
+- name
+```
+
+The exit code is still 0 (WONTFIX), but the named defs are not fully covered by
+Bend's checker. Importing an unused unsafe def does not taint a file; calling it
+or naming it in a type does. Audit every listed def and treat an unexplained or
+changed list as a failed review.
+
+`bend file.bend --checkup` checks and runs each direct aliased import as its
+own root, not the entry file. Use it as an extra diagnostic when a cycle or a
+missing fill is unclear.

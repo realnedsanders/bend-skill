@@ -50,7 +50,8 @@ If this file and the installed `bend base <Name>` disagree, trust the install.
 
 `Type.verb`. Same verbs on `Nat`, `U32`, `F32`:
 
-- arith: `add sub mul div mod`
+- arith: `add sub mul div mod`; `Nat.min`/`Nat.max` are structural, rebuild
+  their result, and have `Nat.ge_refl`, `Nat.max_ge_l`, and `Nat.max_ge_r` laws
 - bits (`U32`): `and or xor not shl shr`
 - cmp: `cmp` → `Cmp` (not on `F32`); `is_eq is_ne is_lt is_le is_gt is_ge` → `Bool`
 - `show` → `String`; `read` → `Maybe`
@@ -93,9 +94,18 @@ rolling your own once, unless you are proving those.
 
 ## IO (names only)
 
-Print/env/time/sleep, spawn/channels, files, TCP/UDP, window/audio.
-No TLS, HTTP, JSON, or regex in Base. Demos implement tiny HTTP on
-TCP. Add foreigns if you must; see [io-and-effects.md](io-and-effects.md).
+Print/env/time/sleep/random, spawn/channels, files, TCP/UDP, window/audio.
+Bend 2.0.22 adds `IO.random_u32`, `File.read_at`, `File.size`,
+`File.write_bytes`, and deadline-based `TCP.poll`. No TLS, HTTP, JSON, or regex
+in Base. Demos implement tiny HTTP on TCP. Add foreigns if you must; see
+[io-and-effects.md](io-and-effects.md).
+
+## Shared arrays (unsafe)
+
+`Array.fork`/`Array.join` alias one block. `Array.atomic.*` provides U32
+atomics and F32 `fadd`. These operations are experimental trusted boundaries,
+not a relaxation of ordinary affine ownership; see
+[ownership.md](ownership.md).
 
 ## When Base is missing something
 

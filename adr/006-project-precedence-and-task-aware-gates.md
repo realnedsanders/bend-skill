@@ -37,7 +37,7 @@ Validation is task-aware:
 - Check libraries without manufacturing `main`.
 - Run/build runnable targets.
 - Re-run proofs and behavior checks after parallelization.
-- Audit any successful verdict that reports unsafe annotations.
+- Audit any successful verdict that reports reliance on unsafe or foreign code.
 
 `SKILL.md` contains precedence, routing, a short workflow, core requirements,
 and the validation contract. Detailed examples and subsystem guidance live in

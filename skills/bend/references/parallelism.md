@@ -8,7 +8,8 @@ a b = pow2(p) pow2(p)
 
 You promise:
 
-1. Independent — true by purity + affinity.
+1. Independent — guaranteed by safe purity + affinity; justify races yourself
+   if you opt into unsafe shared arrays.
 2. Similar runtime — you must keep the tree balanced.
 
 The scheduler is contention-free binary fork-join. A task is handed
@@ -21,8 +22,9 @@ pow2(20n)    # parallel CPU in a native binary
 pow2!(20n)   # GPU (`!` after the name); CPU pool if no GPU
 ```
 
-- Native `!` also builds `file.gpu` beside the binary. Keep them
-  together. `--gpu 4GB` (or off).
+- Native `!` also builds `file.gpu` beside the binary. Keep them together.
+  GPU use is on by default; `--gpu 4GB` caps its heap and `--gpu off` sends
+  bangs to the CPU pool.
 - Unified heap. Apple unified memory: CPU↔GPU is cheap. CUDA: first
   touch of a page faults over PCIe — keep a frame on one side.
 - JS target: sequential; ignore `!`.
@@ -67,12 +69,16 @@ def sum(d: Nat, +i: Nat) -> Nat:
 ```
 
 Law the final parallel function against a sequential specification, then
-rerun the proof after every fork or bang change. The Bend 2.0.10 examples are
+rerun the proof after every fork or bang change. Release-matched examples are
 available upstream in
-[`demos/pure_par_sum`](https://github.com/bendlang/bend/tree/v2.0.10/demos/pure_par_sum)
+[`demos/pure_par_sum`](https://github.com/bendlang/bend/tree/v2.0.22/demos/pure_par_sum)
 and
-[`demos/pure_par_sort`](https://github.com/bendlang/bend/tree/v2.0.10/demos/pure_par_sort).
+[`demos/pure_par_sort`](https://github.com/bendlang/bend/tree/v2.0.22/demos/pure_par_sort).
 Use a source checkout matching the installed release when possible.
+
+Bend 2.0.22 also has experimental shared arrays. Use `Array.fork`/`Array.join`
+and `Array.atomic.*` only behind a documented `@unsafe` aliasing protocol; see
+[ownership.md](ownership.md). Prefer safe fork trees when they fit.
 
 ### Sorting decision
 

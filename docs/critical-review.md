@@ -1,12 +1,12 @@
-# Critical review — 2026-09-19
+# Critical review — 2026-09-20
 
 ## Scope and evidence
 
 Reviewed the skill as both Bend guidance and an Agent Skills artifact.
 
-- Installed compiler: `bend 2.0.10`
-- Source comparison: `bendlang/bend` commit
-  `15ae0c86f3193b8f645b4bedbc438655b648d0da`
+- Installed compiler: `bend 2.0.22`
+- Source comparison: `bendlang/bend` tag `v2.0.22`, commit
+  `8745e421c33e7e6b5e8815a85d974222c2541fc4`
 - Primary sources: installed `bend guide`, targeted `bend base <Name>`,
   `guide/GUIDE.md`, `guide/SHADERS.md`, `guide/EFFECTS.md`, `bend2/base.bend`,
   demos, tests, and `WONTFIX.txt`
@@ -15,14 +15,11 @@ Reviewed the skill as both Bend guidance and an Agent Skills artifact.
 - Independent passes: Bend factual accuracy, skill design/progressive
   disclosure, and a usability scenario (verified U32 sort + GPU request)
 
-The installed CLI and the source checkout are not the same release. The skill
-now records that distinction and tells agents to trust the installed CLI for
-the project being compiled.
-
-`bend guide` exists and remains the language source of truth. Named guide pages
-are versioned separately: on the reviewed 2.0.10 install, `bend guide shaders`
-works but `bend guide effects` does not; the later source checkout documents
-that newer command.
+The installed CLI and source tag match. The installed checker, `bend base`,
+and release-matched tests govern language/API claims. `bend guide` remains the
+first syntax reference, but foreign-effect ABI details must be checked against
+the matching `bend2/effs/` and compiler source: the 2.0.22 effects guide still
+shows an obsolete `io_node` argument.
 
 ## Critical/high findings resolved
 
@@ -33,8 +30,8 @@ that newer command.
    `LAWS.bend`/`PROOF.bend` during narrow work and conflict with existing
    repositories. Added explicit precedence and task-aware assurance gates.
 3. **Exact clean verdict conflicted with intentional unsafe loops.** Clean
-   safe-code output and unsafe-count output are now distinguished; every unsafe
-   occurrence/count must be audited.
+   safe-code output is distinguished from 2.0.22's transitive list of defs that
+   rely on unsafe or foreign code; every named dependency must be audited.
 4. **Progressive disclosure was nominal.** `SKILL.md` repeated most references,
    the CLI, examples, anti-patterns, and checklist. It was reduced from 255 to
    about 125 lines and now routes to targeted references.
@@ -47,8 +44,8 @@ that newer command.
    GPU algorithms. The skill now requires input/container/padding clarification,
    final equivalence laws, proof reruns, and honest reporting of CPU fallback.
 8. **Foreign effects under-specified.** Marked C/JS as trusted code, added
-   registration/need guidance, backend parity and resource checks, and the
-   version-specific named-guide fallback.
+   registration/need guidance, backend parity and resource checks, and made the
+   matching runtime source authoritative when the named guide is stale.
 
 ## Factual corrections resolved
 
@@ -82,8 +79,20 @@ that newer command.
 - Installation commands create parent directories, offer copy/symlink choices,
   and include `/reload` + `/skill:bend` verification.
 
-## Open decision
+## Bend 2.0.22 refresh
 
-The repository has no `LICENSE`. The skill invites copying/installing, so reuse
-terms should be chosen before publication. This review did not invent a license
-on the owner's behalf.
+The release review corrected or added the following guidance:
+
+- `bend version` replaces removed `bend --version`; `--check-only` checks
+  without running, while `--checkup` retains its import-by-import role.
+- Every operator needs its own `( ... : T)` annotation, including `Nat`.
+- Templates are checked definitions and can carry generic law parameters.
+- Unsafe/foreign verdicts name transitive relying defs instead of counting
+  annotations.
+- Typed lets annotate one name; a typed destructuring pattern is invalid.
+- Base additions include random/file APIs, `TCP.poll`, structural `Nat.min/max`,
+  and experimental unsafe shared arrays with atomics.
+- Native GPU use is on by default; `--gpu off` selects CPU fallback.
+
+The repository now has an MIT `LICENSE`; its copyright placeholders still need
+the owner's values.
