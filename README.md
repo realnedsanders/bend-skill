@@ -35,7 +35,7 @@ cp -R "$PWD/skills/bend" /path/to/project/.agents/skills/bend
 ```
 
 Requires Bend 2 (`bend version`). Detailed language claims were checked
-against the installed Bend 2.0.22 CLI. Source research also used
+against the installed Bend 2.0.25 CLI. Source research also used
 `bendlang/bend` tag `v2.0.22` at commit
 `8745e421c33e7e6b5e8815a85d974222c2541fc4`;
 when they differ, the installed CLI governs the project being compiled.
@@ -80,7 +80,7 @@ merging a changed compatibility claim.
 
 ## Sources
 
-- Installed `bend` 2.0.22 (`bend guide`, `bend base`)
+- Installed `bend` 2.0.25 (`bend guide`, `bend base`)
 - Official repo `bendlang/bend` (demos, tests, evals, AGENTS.md)
 - Go skills `golang-patterns` / `golang-testing` (shape)
 - Lean 4 practice by contrast (no tactics skill existed locally)
