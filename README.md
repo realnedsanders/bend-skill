@@ -78,6 +78,18 @@ releases, and Renovate opens a grouped pull request immediately. Bend pull
 requests never automerge: check the skill against the new compiler before
 merging a changed compatibility claim.
 
+## Releases
+
+GitHub releases use `v<bend-version>-skill.<revision>`, such as
+`v2.0.25-skill.0`. The first skill release for a Bend version is `.0`;
+skill-only fixes increment the revision, and a new Bend version starts again at
+`.0`. Bare Bend-version tags are not published.
+
+After validation and link checks pass on `main`, CI creates a release when
+`skills/bend/` changed. A commit already carrying a release tag is a no-op, and
+repository-only changes do not increment the revision. The CI workflow's manual
+dispatch can recover a missed release or explicitly force the next revision.
+
 ## Sources
 
 - Official `bend` 2.0.25 release binary (`bend guide`, `bend base`)
