@@ -5,6 +5,7 @@ on:
     branches:
       - main
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -34,3 +35,98 @@ jobs:
         with:
           fail: true
           args: --no-progress './**/*.md'
+
+  release:
+    name: Release Bend skill
+    if: >-
+      github.ref == 'refs/heads/main' &&
+      (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    needs:
+      - validate-skill
+      - check-links
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    concurrency:
+      group: bend-skill-release
+      cancel-in-progress: false
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - name: Read reviewed Bend version
+        id: version
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(sed -nE 's/^compatibility:.*Detailed claims were checked with Bend ([0-9]+\.[0-9]+\.[0-9]+);.*$/\1/p' skills/bend/SKILL.md)"
+          if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Could not read one Bend version from skills/bend/SKILL.md" >&2
+            exit 1
+          fi
+          if ! grep -Fq "official Bend $version" README.md; then
+            echo "README.md does not contain the official Bend $version release version" >&2
+            exit 1
+          fi
+          echo "bend_version=$version" >> "$GITHUB_OUTPUT"
+      - name: Create immutable skill release
+        env:
+          BEND_VERSION: ${{ steps.version.outputs.bend_version }}
+          EVENT_NAME: ${{ github.event_name }}
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          tag_re="^v${BEND_VERSION//./\.}-skill\.(0|[1-9][0-9]*)$"
+          current_tag=""
+          max_revision=-1
+          mapfile -t tags < <(git tag --list "v${BEND_VERSION}-skill.*")
+
+          for tag in "${tags[@]}"; do
+            if [[ ! "$tag" =~ $tag_re ]]; then
+              echo "Unexpected tag in the Bend $BEND_VERSION release series: $tag" >&2
+              exit 1
+            fi
+            revision="${BASH_REMATCH[1]}"
+            if (( revision > max_revision )); then
+              max_revision="$revision"
+            fi
+            if [[ "$(git rev-list -n 1 "$tag")" == "$GITHUB_SHA" ]]; then
+              if [[ -n "$current_tag" ]]; then
+                echo "Commit $GITHUB_SHA has multiple Bend skill release tags" >&2
+                exit 1
+              fi
+              current_tag="$tag"
+            fi
+          done
+
+          release_args=(
+            --repo "$GITHUB_REPOSITORY"
+            --generate-notes
+          )
+
+          if [[ -n "$current_tag" ]]; then
+            if gh release view "$current_tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+              echo "Release $current_tag already exists for this commit."
+              exit 0
+            fi
+            gh release create "$current_tag" --verify-tag --title "Bend skill $current_tag" "${release_args[@]}"
+            exit 0
+          fi
+
+          if (( max_revision >= 0 )) && [[ "$EVENT_NAME" != "workflow_dispatch" ]]; then
+            if git diff --quiet "$GITHUB_SHA^" "$GITHUB_SHA" -- skills/bend/; then
+              echo "No Bend skill files changed; no release needed."
+              exit 0
+            fi
+          fi
+
+          next_revision=$((max_revision + 1))
+          tag="v${BEND_VERSION}-skill.${next_revision}"
+          if git ls-remote --exit-code --tags origin "refs/tags/$tag" >/dev/null 2>&1; then
+            echo "Tag $tag appeared after checkout; rerun the workflow." >&2
+            exit 1
+          fi
+          gh release create "$tag" --target "$GITHUB_SHA" --title "Bend skill $tag" "${release_args[@]}"
