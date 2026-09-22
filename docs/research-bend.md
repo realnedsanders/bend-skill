@@ -2,9 +2,10 @@
 
 Sources, in order of authority:
 
-1. Installed CLI: `bend` 2.0.22 (`bend version`, `bend guide`, `bend base`)
-2. Official repo tag `v2.0.22` at
-   `8745e421c33e7e6b5e8815a85d974222c2541fc4`
+1. Official release binary: `bend` 2.0.25 (`bend version`, `bend guide`,
+   `bend base`)
+2. Official repo tag `v2.0.25` at
+   `c65bcb788dbfb298bb434c1d858b47c193841dc0`
 3. `AGENTS.md`, `README.md`, `WONTFIX.txt`
 4. `guide/GUIDE.md`, `guide/SHADERS.md`, `guide/EFFECTS.md`
 5. `bend2/base.bend` (via `bend base` / `bend base --types`)
@@ -14,6 +15,28 @@ Sources, in order of authority:
 
 This note is what the skill must encode. It is not a second copy of the
 guide. Agents writing Bend should still run `bend guide`.
+
+## Bend 2.0.23–2.0.25 review
+
+Reviewed the official [v2.0.25 changelog](https://github.com/bendlang/bend/blob/v2.0.25/CHANGELOG.md),
+the [v2.0.22...v2.0.25 source diff](https://github.com/bendlang/bend/compare/v2.0.22...v2.0.25),
+and the v2.0.25 release binary.
+
+| Area | Change | Skill consequence |
+|------|--------|-------------------|
+| Arrays | `Array.map` now walks a block into a fresh array and requires `Data` input and output elements. | Document the faster operation and its stricter kind contract; affine arrays need a tree-consuming helper. |
+| Literals | Nat and string literals remain compact in the checker and unfold as needed. Literal sugar is tied to Base's datatypes, not merely the names `Nat` and `String`. | Correct the literal model and warn custom same-named datatypes to use constructors. |
+| Templates | A second `~` binder with the same name in one def or law is rejected. | Require unique template binder names. |
+| Compiler/runtime | Applied annotated lambdas and matches, very wide records, deep GPU fork spines, and device leaves under a bang now compile or run in cases that failed before. | Remove no valid pattern; record the remaining wide-value join/non-tail-call limits and avoid old GPU workarounds. |
+| CLI/loaders | `-o out.cjs` emits CommonJS, absolute imports work under `--checkup`, and Bun/Node loaders report unsafe or foreign dependencies. | Add `.cjs`; tell reviewers to inspect loader stderr. |
+| Effects | Related file/audio effects may share one source; scheduling helpers no longer collide with an effect named `X_need`. | Follow the def and host symbol rather than assuming one source file per effect. |
+
+Validation with the v2.0.25 Linux x64 release binary included `bend version`,
+`bend base Array`, the upstream `array_map_loop`, `inline_applied_fun`,
+`record_wide_node`, `fork_spine_unroll`, and `fork_leaf_result_loop` cases,
+the expected failures for duplicate template binders and custom-`Nat` literals,
+and successful `.cjs` emission. The guide files did not change from v2.0.22;
+the known stale foreign-effect ABI example therefore remains stale in v2.0.25.
 
 ## What Bend is
 
@@ -54,7 +77,7 @@ From `AGENTS.md`:
 | `bend2/main.ts` | CLI; also the `.bend` loader for bun/node |
 | `bend2/base.bend` | Prelude |
 | `bend2/bend.lean` | Core mechanized in Lean (lags `bend.ts`) |
-| `bend2/effs/` | One file per IO effect, per backend |
+| `bend2/effs/` | IO effect sources per backend; related effects may share a file |
 | `tests/<ns>/` | Tests are Bend files ending in `#|` expected output |
 | `demos/` | One dir per demo, almost always with `LAWS.bend` |
 | `evals/` | Law-and-proof tasks used to grade models |
@@ -168,7 +191,7 @@ WONTFIX.
 - `IO.fork` / `IO.join` / `IO.spawn` / channels: one event loop, Node-like.
 - Custom effects: body is `import "./x.c"` plus `import "./x.js"`. Host
   name is the def, lowercased, dots to underscores. No ABI promise across Bend
-  versions. In 2.0.22 `guide/EFFECTS.md` still shows an obsolete `io_node`
+  versions. In 2.0.25 `guide/EFFECTS.md` still shows an obsolete `io_node`
   argument, so matching `bend2/effs/` and compiler source outrank that ABI
   example.
 - User handle types are WONTFIX: reuse Base handle laws.

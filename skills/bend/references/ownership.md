@@ -93,6 +93,9 @@ a[5]               # read: yields array & element
 - Indexes wrap.
 - For safe code, do not hand an `Array` down a fork tree. Build cons lists for
   tiles (`bend guide shaders`) or move disjoint arrays into branches.
+- `Array.map(~T, ~U, ~f, a)` uses a fast get/set loop into a fresh block, but
+  both element types must be `Data`. Consume the tree manually when elements
+  are affine.
 - `Array.fork(T, a)` creates two handles to one block in O(1), and
   `Array.join(T, a, b)` merges them. Both are `@unsafe`: document the aliasing
   protocol, join every fork, and prevent unsynchronized writes to one cell.
@@ -130,6 +133,12 @@ copy. Do not generalize channel behavior to the opaque affine handles.
 CPU code: still avoid `+` you do not need. Sharing a `Data` tree
 across a parallel let is supported (`tests/rfc/share_forked.bend`)
 but you pay counts.
+
+Bend boxes multi-word fields when a flattened field list would exceed 255
+words, allowing many nested wide records to compile at the cost of possible
+allocation. This does not remove every arity limit: a join that holds several
+wide results, or a wide value held across a non-tail call, can still be refused.
+Split such values or calls, and measure the resulting layout.
 
 ## Practical rules
 

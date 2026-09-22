@@ -125,7 +125,7 @@ If the program called `le_case(x, h)` and branched, the proof cannot
 `match le_case(x, h)`. Pass the verdict into `.fin` and match that.
 
 See the release-matched
-[`demos/proof_insertion_sort`](https://github.com/bendlang/bend/tree/v2.0.22/demos/proof_insertion_sort)
+[`demos/proof_insertion_sort`](https://github.com/bendlang/bend/tree/v2.0.25/demos/proof_insertion_sort)
 example, or the corresponding directory in a source checkout matching the
 installed compiler.
 
@@ -247,6 +247,6 @@ Bend's checker. Importing an unused unsafe def does not taint a file; calling it
 or naming it in a type does. Audit every listed def and treat an unexplained or
 changed list as a failed review.
 
-`bend file.bend --checkup` checks and runs each direct aliased import as its
-own root, not the entry file. Use it as an extra diagnostic when a cycle or a
-missing fill is unclear.
+The undocumented `bend file.bend --checkup` diagnostic checks and runs each
+direct aliased import as its own root, not the entry file. Use it when a cycle
+or a missing fill is unclear; do not treat it as a stable public interface.

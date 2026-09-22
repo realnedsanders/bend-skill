@@ -96,3 +96,37 @@ The release review corrected or added the following guidance:
 
 The repository now has an MIT `LICENSE`; its copyright placeholders still need
 the owner's values.
+
+## Bend 2.0.25 follow-up — 2026-09-22
+
+Reviewed releases 2.0.23 through 2.0.25 with the official Linux x64 release
+binary and source tag `v2.0.25` at
+`c65bcb788dbfb298bb434c1d858b47c193841dc0`. Evidence included the
+[v2.0.25 changelog](https://github.com/bendlang/bend/blob/v2.0.25/CHANGELOG.md),
+the [v2.0.22...v2.0.25 diff](https://github.com/bendlang/bend/compare/v2.0.22...v2.0.25),
+`bend guide`, targeted `bend base Array`, and selected upstream regressions.
+
+The follow-up changed the skill where public behavior affects users:
+
+- Documented `Array.map`'s faster block traversal and new `Data`-only element
+  contract, plus the manual-tree fallback for affine elements.
+- Corrected Nat/String literal guidance for the compact checker
+  representation, Base datatype identity, and literal limits.
+- Required unique `~` binder names within each def or law.
+- Added `U32.log2`, `.cjs` output, absolute-`--checkup` behavior, loader trust
+  diagnostics, wide-record caveats, and shared foreign-effect source guidance.
+- Moved release-matched demo links and source provenance to v2.0.25.
+
+Validation results:
+
+- `array_map_loop.bend` printed `690` and `1`.
+- `inline_applied_fun.bend` printed `10`.
+- `record_wide_node.bend` emitted non-empty C; `fork_spine_unroll.bend` and
+  `fork_leaf_result_loop.bend` passed `--check-only`.
+- Duplicate template binders and literals against custom `Nat` and `String`
+  datatypes failed with the new expected diagnostics and exit code 1.
+- `-o /tmp/inline.cjs` emitted a non-empty CommonJS file, and `--checkup`
+  opened and ran a direct absolute import.
+
+The v2.0.25 guide files are unchanged from v2.0.22. The existing warning that
+the effects guide shows a stale `io_node` call remains necessary.
