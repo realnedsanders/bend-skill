@@ -35,9 +35,9 @@ cp -R "$PWD/skills/bend" /path/to/project/.agents/skills/bend
 ```
 
 Requires Bend 2 (`bend version`). Detailed language claims were checked
-against the installed Bend 2.0.25 CLI. Source research also used
-`bendlang/bend` tag `v2.0.22` at commit
-`8745e421c33e7e6b5e8815a85d974222c2541fc4`;
+against the official Bend 2.0.25 Linux release binary. Source research used
+`bendlang/bend` tag `v2.0.25` at commit
+`c65bcb788dbfb298bb434c1d858b47c193841dc0`;
 when they differ, the installed CLI governs the project being compiled.
 
 ## Layout
@@ -53,7 +53,7 @@ when they differ, the installed CLI governs the project being compiled.
 - Default project: `main.bend` + `LAWS.bend` + `PROOF.bend`
 - Gate: `bend PROOF.bend` → `All terms check.`
 - No invented `if`, tactics, typeclasses, inference, or `match f(x)`
-- Decreasing argument first; `@unsafe` only for the outside world
+- Decreasing argument first; `@unsafe` only at documented trusted boundaries
 - `+` only for real reuse of `Data`
 - `Type.verb` names; look up Base instead of reinventing it
 
@@ -80,7 +80,7 @@ merging a changed compatibility claim.
 
 ## Sources
 
-- Installed `bend` 2.0.25 (`bend guide`, `bend base`)
+- Official `bend` 2.0.25 release binary (`bend guide`, `bend base`)
 - Official repo `bendlang/bend` (demos, tests, evals, AGENTS.md)
 - Go skills `golang-patterns` / `golang-testing` (shape)
 - Lean 4 practice by contrast (no tactics skill existed locally)

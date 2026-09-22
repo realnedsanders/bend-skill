@@ -65,12 +65,14 @@ the next effect. Waiting on socket/sleep/channel yields.
 - `IO.spawn`, `Chan.new`, `Chan.send`, `Chan.recv`, `Chan.close`
 
 The process ends when every computation is done, or reports deadlock
-if they all wait.
+if they all wait. Bend 2.0.25 fixed macOS FIFO readers that failed to observe
+EOF; reproduce that symptom on a current compiler before adding a polling
+workaround.
 
 Servers that loop forever: `@unsafe` + comment, or fuel. Prove the
 per-connection **pure** function (`http_response`), not the accept loop. See
 release-matched
-[`demos/io_http_server`](https://github.com/bendlang/bend/tree/v2.0.22/demos/io_http_server)
+[`demos/io_http_server`](https://github.com/bendlang/bend/tree/v2.0.25/demos/io_http_server)
 or the corresponding demo in a matching source checkout. `TCP.poll` adds a
 receive deadline for dropping idle connections.
 
@@ -99,11 +101,13 @@ def Clock.now() -> IO(U32):
 - `.c` for native; `.js` for JS and `bend file.bend`.
 - The C backend defines the run function and registers it with
   `io_eff(CID_..., run, need)` from a constructor. A blocking JS effect also
-  supplies `<name>_need` and parks/resumes through the runtime API. Copy the
-  matching upstream effect; these runtime names are version-coupled.
+  supplies `<name>_need` and parks/resumes through the runtime API. One source
+  file may implement several related effects, so follow the matching def and
+  host symbol rather than guessing from the filename. These runtime names are
+  version-coupled.
 - Need 0 (run now), `IO_READ`, `IO_TIME`, etc. Read `bend guide effects`,
   but treat a matching checkout's `bend2/effs/` and compiler as the ABI source
-  of truth. The Bend 2.0.22 guide still shows an obsolete extra `hot` argument
+  of truth. The Bend 2.0.25 guide still shows an obsolete extra `hot` argument
   to `io_node`; current sealing derives from constructor identity.
 - **No ABI promise.** Rebuild and retest effects on every Bend upgrade.
 - Output binary name must not collide with the effect files.

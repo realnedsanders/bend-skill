@@ -29,11 +29,12 @@ bend base Map
 
 bend file.bend              # check; run main
 bend file.bend --check-only # check target and imports; run nothing
-bend file.bend --checkup    # check/run each direct aliased import as a root
+bend file.bend --checkup    # undocumented: check/run direct imports as roots
 bend PROOF.bend             # fill-and-prove gate
 bend file.bend -o out       # native (clang 14+; 19+ with !)
 bend file.bend -o out.c
-bend file.bend -o out.js    # fast iteration
+bend file.bend -o out.js    # JavaScript output
+bend file.bend -o out.cjs   # CommonJS output
 bend page.html -o dist
 bend file.bend --publish    # print import 0x<hash>/main.bend as ...
 bend update                 # prints curl | sh first
@@ -93,6 +94,12 @@ string.
    effects have no Bun dependency. Use native when testing threads/GPU.
 4. Use `bend main.bend --checkup` when each direct aliased import must be
    checked and run as its own root; it does not replace checking `main.bend`.
+   Relative imports resolve from the entry file; absolute import paths are
+   used as written.
+
+The Bun and Node `.bend` loaders report transitive unsafe or foreign
+dependencies on stderr, like the CLI. Treat an unexpected warning as a review
+failure even when loading succeeds.
 
 Compiling native is slow (clang/CUDA/Metal). Do not use `-o binary`
 as your unit-test loop.

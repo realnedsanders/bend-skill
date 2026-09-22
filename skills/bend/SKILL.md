@@ -29,7 +29,7 @@ but must not weaken their meaning merely to pass.
   `bend base` is large.
 - Run or search `bend guide` when syntax is unfamiliar or the installed
   version changed. The actual checker and `bend base` win if prose conflicts;
-  the 2.0.22 guide still contains stale operator and foreign-ABI details. For
+  the 2.0.25 guide still contains stale operator and foreign-ABI details. For
   graphics, use `bend guide shaders`.
 - When a source checkout is available, its demos and `guide/*.md` are useful,
   but the installed CLI governs the code being built.
@@ -130,8 +130,9 @@ PROOF.bend     # fills; imports LAWS.bend
 - Runnable target: run `bend file.bend`; for a requested native backend, build
   with `bend file.bend -o out` and then execute `./out` with the intended flags.
 - Library/no `main`: run `bend file.bend`; it checks only.
-- Import-sensitive change: add `bend file.bend --checkup`; it checks and runs
-  each direct aliased import as a root, not the entry file.
+- Import-sensitive change: optionally use the undocumented diagnostic
+  `bend file.bend --checkup`; it checks and runs each direct aliased import as
+  a root, not the entry file.
 - Performance change: compare the relevant CPU/GPU/JS modes and record input,
   hardware, flags, and repeated measurements.
 - Always inspect the exit code and diagnostics; do not require files that the

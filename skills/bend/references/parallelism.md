@@ -71,9 +71,9 @@ def sum(d: Nat, +i: Nat) -> Nat:
 Law the final parallel function against a sequential specification, then
 rerun the proof after every fork or bang change. Release-matched examples are
 available upstream in
-[`demos/pure_par_sum`](https://github.com/bendlang/bend/tree/v2.0.22/demos/pure_par_sum)
+[`demos/pure_par_sum`](https://github.com/bendlang/bend/tree/v2.0.25/demos/pure_par_sum)
 and
-[`demos/pure_par_sort`](https://github.com/bendlang/bend/tree/v2.0.22/demos/pure_par_sort).
+[`demos/pure_par_sort`](https://github.com/bendlang/bend/tree/v2.0.25/demos/pure_par_sort).
 Use a source checkout matching the installed release when possible.
 
 Bend 2.0.22 also has experimental shared arrays. Use `Array.fork`/`Array.join`
@@ -109,3 +109,10 @@ not data-parallel `!`.
 A bang that follows host forks in the **same** evaluation may run on
 the CPU pool. `IO.now()` between host build and bang, as in the
 slash-boss turn loop, is the documented way to split them.
+
+## Older-toolchain diagnostics
+
+Before restructuring valid code around a GPU memory fault, reproduce it on the
+current compiler. Bend 2.0.23 fixed device fork spines that continued past 128
+levels, and 2.0.24 fixed fork-free leaves under `!` that could exhaust lane
+memory during deep monadic loops.

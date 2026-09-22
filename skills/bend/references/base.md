@@ -56,6 +56,7 @@ If this file and the installed `bend base <Name>` disagree, trust the install.
 - cmp: `cmp` → `Cmp` (not on `F32`); `is_eq is_ne is_lt is_le is_gt is_ge` → `Bool`
 - `show` → `String`; `read` → `Maybe`
 - conversions: `T.to_x`, `T.from_x` (`U32.to_nat`)
+- `U32.log2` returns the floor base-2 logarithm of a positive value as `Nat`
 
 Operators with `( ... : T )` desugar to these. `<`-style comparisons
 too. Value equality is `T.is_eq`, never `==`.
@@ -77,6 +78,17 @@ get set take drop zip range replicate`.
 
 `List.map` cannot take an affine closure you plan to call on every element.
 Pass a closed template, such as `~Top.show` or `~(x => ...)`.
+
+## Array
+
+`Array.map(~T, ~U, ~f, a)` walks the block and writes a fresh array. Both `T`
+and `U` must be `Data`; its speed comes with this stricter contract. To map
+an array of affine elements, consume its `ALeaf`/`ANode` tree explicitly with
+a project-local helper.
+
+Other common operations: `new size get set swap clone to_list`. Query
+`bend base Array` before choosing one because element-kind requirements differ.
+See [ownership.md](ownership.md) before using `fork`, `join`, or atomics.
 
 ## Map
 

@@ -113,13 +113,19 @@ match `0n` / `1n+f`, recurse on `f`.
   bare `a + b`.
 - Bits: `.&.` `.|.` `.^.` `<<` `>>` (shift amount is `Nat`).
 - `++` is `String` concat anywhere.
-- `3` is `U32`. `3n` is `Nat`. `'c'` is `Char`. `"s"` is `String`.
-- `3n` past `256n` is `U32.to_nat(n)` underneath, up to `4294967295n`.
+- `3` is `U32`. `3n` is Base's `Nat`. `'c'` is `Char`. `"s"` is
+  Base's `String`. Only those Base datatypes get native literal treatment.
+  Against a custom same-named datatype, the literal unfolds to `Zero`/`Succ`
+  or `SNil`/`SCon` and must typecheck structurally; prefer explicit constructors.
+- Nat and string literals stay compact in the checker and unfold one
+  constructor at a time. A `Nat` literal is capped at `4294967295n`; values
+  past `256n` may lower through `U32.to_nat` when compiled.
 - Lists: `[a, b]`, `h <> t`. Tuples: `(a, b)`.
 - Constructors: `K{field, field}`. Unit: `Unit{}`. Bool: `True{}` /
   `False{}`.
-- Arrays: `[v : T*n]` length power of two, or `[v : T^d]` depth.
-  `a[i]` and `a[i] <- v` (U32 elements). Indexes wrap.
+- Arrays: `[v : T*n]` uses a power-of-two count within the Nat literal cap;
+  `[v : T^d]` uses a depth. `a[i]` and `a[i] <- v` are U32-element sugar.
+  Indexes wrap.
 
 ## Quantities on binders
 
@@ -149,11 +155,12 @@ def twice(~f: U32 -> U32, x: U32) -> U32:
 # call: twice(~(x => (x + 1 : U32)), 40)
 ```
 
-Template arguments first. `~` args must be closed (no caller locals).
-A template may call only templates declared **above** it. Since Bend 2.0.17,
-the template body is checked once against opaque parameters; each instance is
-that checked definition, not a re-read of its source. Laws may take `~`
-parameters, and a template instance does not by itself make a verdict unsafe.
+Template arguments first. `~` args must be closed (no caller locals), and
+binder names must be unique within one def or law. A template may call only
+templates declared **above** it. Since Bend 2.0.17, the template body is checked
+once against opaque parameters; each instance is that checked definition, not
+a re-read of its source. Laws may take `~` parameters, and a template instance
+does not by itself make a verdict unsafe.
 
 ## Typed lets
 
