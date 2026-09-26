@@ -35,7 +35,7 @@ cp -R "$PWD/skills/bend" /path/to/project/.agents/skills/bend
 ```
 
 Requires Bend 2 (`bend version`). Detailed language claims were checked
-against the official Bend 2.0.25 Linux release binary. Source research used
+against the official Bend 2.0.29 Linux release binary. Source research used
 `bendlang/bend` tag `v2.0.25` at commit
 `c65bcb788dbfb298bb434c1d858b47c193841dc0`;
 when they differ, the installed CLI governs the project being compiled.
@@ -92,7 +92,7 @@ dispatch can recover a missed release or explicitly force the next revision.
 
 ## Sources
 
-- Official `bend` 2.0.25 release binary (`bend guide`, `bend base`)
+- Official `bend` 2.0.29 release binary (`bend guide`, `bend base`)
 - Official repo `bendlang/bend` (demos, tests, evals, AGENTS.md)
 - Go skills `golang-patterns` / `golang-testing` (shape)
 - Lean 4 practice by contrast (no tactics skill existed locally)

@@ -1,7 +1,7 @@
 ---
 name: bend
 description: Write, review, debug, and prove idiomatic Bend 2 programs. Covers .bend files, LAWS.bend and PROOF.bend, affine quantities, structural termination, Base, IO and effects, and CPU/GPU fork-join parallelism. Use for Bend CLI checks, compiler errors, correctness laws, proofs, ownership, or performance work in Bend.
-compatibility: Requires the Bend 2 CLI. Detailed claims were checked with Bend 2.0.25; trust the installed checker and `bend base <Name>` when versions differ.
+compatibility: Requires the Bend 2 CLI. Detailed claims were checked with Bend 2.0.29; trust the installed checker and `bend base <Name>` when versions differ.
 ---
 
 # Bend
